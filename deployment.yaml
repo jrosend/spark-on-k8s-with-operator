@@ -1,0 +1,46 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: k8s-spark
+  namespace: spark
+spec:
+  sparkConf:
+    "spark.kubernetes.file.upload.path": "/user/yourname/spark"
+  type: Scala
+  mode: cluster
+  image: study/k8s-spark:alpha1
+  imagePullPolicy: Never
+  mainClass: com.example.App
+  mainApplicationFile: "local:///app/k8s-spark.jar"
+  sparkVersion: "3.3.2"
+  restartPolicy:
+    type: Never
+  driver:
+    cores: 1
+    coreLimit: "1200m"
+    memory: "512m"
+    labels:
+      version: "v1"
+    volumeMounts:
+    - name: config
+      mountPath: /opt/spark/conf
+    - name: jars
+      mountPath: /opt/spark/jars
+  executor:
+    cores: 1
+    instances: 1
+    memory: "512m"
+    labels:
+      version: "v1"
+    volumeMounts:
+    - name: config
+      mountPath: /opt/spark/conf
+    - name: jars
+      mountPath: /opt/spark/jars
+  volumes:
+  - name: config
+    configMap:
+      name: spark-config
+  - name: jars
+    configMap:
+      name: spark-jars
